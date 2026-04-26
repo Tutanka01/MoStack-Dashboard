@@ -1,6 +1,6 @@
 # OpenStack Lab Control
 
-Dashboard local read-only pour comprendre et piloter un lab OpenStack multi-node sans exposer les credentials au navigateur.
+Dashboard local pour comprendre et piloter un lab OpenStack multi-node sans exposer les credentials au navigateur.
 
 ## Objectif
 
@@ -9,7 +9,7 @@ OpenStack Lab Control fournit une interface claire, pédagogique et architectura
 ## Architecture
 
 - `frontend/` : React + TypeScript + Vite + Tailwind CSS + Recharts + Lucide React.
-- `backend/` : FastAPI, proxy read-only vers OpenStack via REST direct.
+- `backend/` : FastAPI, proxy REST vers OpenStack avec verrou read-only serveur.
 - `docker-compose.yml` : lance le backend sur `8000` et le frontend sur `5173`.
 - `.env` : toute la configuration sensible et lab-specific.
 
@@ -30,6 +30,12 @@ OPENSTACK_USERNAME=admin
 OPENSTACK_PASSWORD=your-password
 OPENSTACK_PROJECT_NAME=admin
 DASHBOARD_READ_ONLY=true
+```
+
+Pour autoriser les actions depuis le dashboard, passez explicitement le backend en mode ecriture :
+
+```env
+DASHBOARD_READ_ONLY=false
 ```
 
 Les valeurs par défaut ciblent le lab décrit :
@@ -106,14 +112,14 @@ Les endpoints sont decouverts via le service catalog Keystone selon `OPENSTACK_R
 - Aucun mot de passe hardcode.
 - `.env` est ignore par Git.
 - Le frontend ne recoit jamais les credentials ni le token Keystone.
-- `DASHBOARD_READ_ONLY=true` par defaut.
-- Aucune action destructive n'est exposee en v1.
+- `DASHBOARD_READ_ONLY=true` par defaut, et le backend refuse toute mutation tant qu'il reste actif.
+- Les actions destructives passent uniquement par l'API backend et demandent une confirmation cote interface.
 - Les erreurs OpenStack sont affichees sans rendre l'interface brutale.
 
 ## Limitations v1
 
-- Lecture seule uniquement.
-- Pas de creation/suppression de VM, volume, reseau ou port.
+- Upload binaire d'images Glance non implemente, seule la creation de metadata image est exposee.
+- Pas de gestion avancee des ports Neutron.
 - Pas de gestion RBAC propre au dashboard.
 - Pas de monitoring temps reel, uniquement refresh manuel ou auto-refresh 30 secondes.
 - La qualite des donnees depend des droits du compte OpenStack configure.

@@ -11,7 +11,8 @@ import {
   Network,
   RefreshCw,
   Server,
-  ShieldCheck
+  ShieldCheck,
+  Unlock
 } from 'lucide-react';
 import { StatusBadge } from '../components/StatusBadge';
 
@@ -40,7 +41,10 @@ type Props = {
   globalStatus?: string;
   region?: string;
   autoRefresh: boolean;
+  writeMode: boolean;
+  canWrite: boolean;
   onAutoRefreshChange: (value: boolean) => void;
+  onWriteModeChange: (value: boolean) => void;
   onRefresh: () => void;
 };
 
@@ -49,7 +53,10 @@ export function AppShell({
   globalStatus = 'UNKNOWN',
   region = 'RegionOne',
   autoRefresh,
+  writeMode,
+  canWrite,
   onAutoRefreshChange,
+  onWriteModeChange,
   onRefresh
 }: Props) {
   const now = useClock();
@@ -74,8 +81,9 @@ export function AppShell({
     `PROVIDER · 10.3.16.0/23`,
     `OVS · provider:br-provider`,
     `CINDER · cinder-volumes / lvm`,
-    `MODE · READ-ONLY`
+    `MODE · ${writeMode ? 'WRITE' : 'READ-ONLY'}`
   ];
+  const ModeIcon = writeMode ? Unlock : Lock;
 
   return (
     <div className="relative min-h-screen bg-[#EFE9D9] text-[#11100D]">
@@ -107,8 +115,8 @@ export function AppShell({
             </div>
           </div>
           <div className="hidden md:flex items-center gap-2 px-4 py-1.5 border-l border-[#EFE9D9]/15 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em]">
-            <Lock className="h-3 w-3" />
-            READ-ONLY
+            <ModeIcon className="h-3 w-3" />
+            {writeMode ? 'WRITE' : 'READ-ONLY'}
           </div>
         </div>
       </div>
@@ -174,7 +182,9 @@ export function AppShell({
             </div>
             <div className="flex justify-between">
               <span>Mode</span>
-              <span className="text-[#DD2A1C]">Read only</span>
+              <span className={writeMode ? 'text-[#07683C]' : 'text-[#DD2A1C]'}>
+                {writeMode ? 'Write' : 'Read only'}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Local clock</span>
@@ -200,12 +210,25 @@ export function AppShell({
                 <span>Region</span>
                 <span className="text-[#11100D] font-medium">{region}</span>
               </span>
-              <span className="meta-pill is-klein">
+              <span className={`meta-pill ${writeMode ? 'is-leaf' : 'is-klein'}`}>
                 <ShieldCheck className="h-3 w-3" />
-                Read-only
+                {writeMode ? 'Write' : 'Read-only'}
               </span>
             </div>
             <div className="flex items-center gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => onWriteModeChange(!writeMode)}
+                className={`inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] transition ${
+                  writeMode
+                    ? 'border-[#DD2A1C] bg-[#DD2A1C] text-[#EFE9D9]'
+                    : 'border-[#11100D]/30 bg-[#F7F2E2] text-[#11100D] hover:border-[#11100D]'
+                }`}
+                title={canWrite ? 'Toggle operator write mode' : 'Backend writes are locked by DASHBOARD_READ_ONLY'}
+              >
+                <ModeIcon className="h-3 w-3" />
+                {writeMode ? 'Write' : 'Read'}
+              </button>
               <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#2A2722] cursor-pointer">
                 <input
                   type="checkbox"

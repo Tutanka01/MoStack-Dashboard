@@ -17,14 +17,14 @@ settings = get_settings()
 app = FastAPI(
     title="OpenStack Lab Control API",
     version="0.1.0",
-    description="Read-only proxy API for a local OpenStack multi-node lab dashboard.",
+    description="API-only OpenStack lab control plane for a local multi-node dashboard.",
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["*"],
 )
 

@@ -128,11 +128,15 @@ class OpenStackClient:
         service_type: str,
         path: str = "",
         *,
+        method: str = "GET",
         params: dict[str, Any] | None = None,
+        json: Any | None = None,
         headers: dict[str, str] | None = None,
         cache_key: str | None = None,
         ttl: int | None = None,
+        expected_status: set[int] | None = None,
     ) -> Any:
+        method = method.upper()
         if cache_key:
             cached = self._cache.get(cache_key)
             if cached and time.time() < cached[0]:
@@ -147,8 +151,10 @@ class OpenStackClient:
 
         try:
             async with httpx.AsyncClient(timeout=self.settings.openstack_timeout_seconds) as client:
-                response = await client.get(url, params=params, headers=request_headers)
+                response = await client.request(method, url, params=params, json=json, headers=request_headers)
                 response.raise_for_status()
+                if expected_status and response.status_code not in expected_status:
+                    raise OpenStackAPIError(service_type, f"{service_type} returned unexpected HTTP {response.status_code}", response.status_code)
                 data = response.json() if response.content else {}
         except httpx.HTTPStatusError as exc:
             raise OpenStackAPIError(service_type, f"{service_type} returned HTTP {exc.response.status_code}", exc.response.status_code) from exc
@@ -159,6 +165,8 @@ class OpenStackClient:
 
         if cache_key:
             self._cache[cache_key] = (time.time() + (ttl or self.settings.cache_ttl_seconds), data)
+        if method != "GET":
+            self._cache.clear()
         return data
 
     async def service_status(self, service_type: str, path: str = "") -> dict[str, Any]:
