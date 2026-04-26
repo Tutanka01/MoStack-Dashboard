@@ -131,8 +131,20 @@ export function AppShell({
               <div className="relative h-7 w-7">
                 <div className="absolute inset-0 bg-[#11100D]" />
                 <div className="absolute inset-[5px] bg-[#DD2A1C]" />
-                <div className="absolute left-1/2 top-1/2 h-[2px] w-3 -translate-x-1/2 -translate-y-1/2 bg-[#EFE9D9]" />
-                <div className="absolute left-1/2 top-1/2 h-3 w-[2px] -translate-x-1/2 -translate-y-1/2 bg-[#EFE9D9]" />
+                <svg
+                  className="absolute inset-[7px]"
+                  viewBox="0 0 100 100"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="M50 7 60 38 93 38 66 57 76 89 50 69 24 89 34 57 7 38 40 38Z"
+                    fill="none"
+                    stroke="#07683C"
+                    strokeWidth="9"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
               <h1 className="font-display text-[26px] font-semibold leading-none tracking-[-0.02em]">
                 MoStack
