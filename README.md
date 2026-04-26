@@ -9,6 +9,13 @@
 
 ---
 
+## Images
+
+![alt text](images/image1.png)
+![alt text](images/image2.png)
+
+---
+
 ## Pourquoi MoStack Dashboard ?
 
 Administrer un lab OpenStack multi-node depuis Horizon, c'est naviguer dans une interface pensée pour la production, pas pour apprendre. MoStack Dashboard renverse cette logique : il expose **ce qui se passe vraiment** à l'intérieur — chaque service, chaque hyperviseur, chaque flux réseau — avec une interface épurée, des explications contextuelles et une architecture proxy qui garde vos tokens Keystone strictement côté serveur.
