@@ -9,9 +9,9 @@ import { Field, inputClass, OperationPanel, OperatorNotice, OperatorProps, Submi
 import { Panel } from '../components/Panel';
 import { AnyRecord, Mono, PageTitle, apiItems, formatDate, statusCell } from './pageUtils';
 
-const BTN = 'inline-flex items-center gap-1 border border-[#11100D]/20 bg-[#F7F2E2] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
-const BTN_DANGER = 'inline-flex items-center gap-1 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
-const BTN_CONFIRM = 'inline-flex items-center gap-1 border border-[#07683C]/40 bg-[#07683C]/[0.07] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#07683C] transition hover:bg-[#07683C] hover:text-white disabled:opacity-35 cursor-pointer';
+const BTN = 'inline-flex items-center gap-1.5 border border-[#11100D]/20 bg-[#F7F2E2] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
+const BTN_DANGER = 'inline-flex items-center gap-1.5 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
+const BTN_CONFIRM = 'inline-flex items-center gap-1.5 border border-[#07683C]/40 bg-[#07683C]/[0.07] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#07683C] transition hover:bg-[#07683C] hover:text-white disabled:opacity-35 cursor-pointer';
 
 export default function StoragePage({ refreshKey, writeMode, canWrite, onMutated }: { refreshKey: number } & OperatorProps) {
   const volumes   = useApi<AnyRecord>('/storage/volumes', refreshKey);
@@ -83,8 +83,8 @@ export default function StoragePage({ refreshKey, writeMode, canWrite, onMutated
       <PageTitle
         num="04"
         eyebrow="Cinder"
-        title="Block storage — what survives a reboot."
-        description="Full volume lifecycle: create, extend, snapshot, set bootable, upload to Glance. LVM backend over iSCSI on os-comput02."
+        title="Block storage"
+        description="Cinder volumes, snapshots, pools and services. LVM backend over iSCSI on os-comput02."
         meta={[
           { label: 'Volumes',   value: String(volumeRows.length) },
           { label: 'Snapshots', value: String(snapshotRows.length) },
@@ -160,16 +160,11 @@ export default function StoragePage({ refreshKey, writeMode, canWrite, onMutated
             ))}
           </dl>
         </Panel>
-        <Panel num="04.B" title="Storage model" eyebrow="Mental model" action={<HardDrive className="h-5 w-5 text-[#DD2A1C]" />}>
-          <p className="font-serif text-2xl leading-9 italic text-[#2A2722] max-w-3xl">
-            Cinder fournit du <span className="not-italic font-display font-medium text-[#11100D]">block storage persistant</span>.
-            Ici, le backend est <span className="font-mono text-base not-italic text-[#11100D]">LVM + iSCSI via tgt</span> sur
-            <span className="font-mono text-base not-italic text-[#11100D]"> os-comput02</span>.
-          </p>
-          <div className="mt-6 grid grid-cols-3 gap-4">
+        <Panel num="04.B" title="Storage model" eyebrow="Reference" action={<HardDrive className="h-5 w-5 text-[#DD2A1C]" />}>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[['Persistent', 'Survives reboot'], ['Block', 'Raw devices'], ['Attached', 'Via iSCSI to Nova']].map(([title, desc]) => (
               <div key={title} className="border-l-2 border-[#DD2A1C] pl-3">
-                <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#DD2A1C]">{title}</div>
+                <div className="label-compact text-[#DD2A1C]">{title}</div>
                 <div className="text-sm text-[#2A2722] mt-1">{desc}</div>
               </div>
             ))}

@@ -67,10 +67,10 @@ body::before {
 
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.08em;
   color: var(--color-mute);
 }
 .eyebrow-ink { color: var(--color-ink); }
@@ -78,17 +78,40 @@ body::before {
 
 .label-mono {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
+}
+
+.label-compact {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-mute);
+}
+
+.section-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 1.5rem;
+  border: 1px solid rgba(17, 16, 13, 0.22);
+  background: var(--color-card);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-ink);
 }
 
 /* Backgrounds */
 .swiss-grid {
   background-image:
-    linear-gradient(to right, rgba(17, 16, 13, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(17, 16, 13, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(17, 16, 13, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17, 16, 13, 0.028) 1px, transparent 1px);
   background-size: 56px 56px;
   background-position: 0 0;
 }
@@ -201,10 +224,10 @@ body::before {
   grid-template-columns: 22px 12px 16px 1fr;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.55rem 0.7rem;
+  padding: 0.58rem 0.7rem;
   font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.005em;
+  font-weight: 600;
+  letter-spacing: 0;
   color: var(--color-ink);
   background: transparent;
   border: 1px solid transparent;
@@ -336,8 +359,8 @@ input[type="checkbox"] {
   border: 1px solid rgba(17, 16, 13, 0.25);
   background: var(--color-card);
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-ink);
 }

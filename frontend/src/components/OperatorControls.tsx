@@ -34,14 +34,14 @@ export function useMutation(onMutated: () => void) {
 export function OperatorNotice({ writeMode, canWrite }: Pick<OperatorProps, 'writeMode' | 'canWrite'>) {
   if (writeMode && canWrite) {
     return (
-      <div className="mb-6 border-l-2 border-[#DD2A1C] bg-[#DD2A1C]/[0.07] px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[#2A2722]">
+      <div className="mb-5 border-l-2 border-[#DD2A1C] bg-[#DD2A1C]/[0.07] px-4 py-3 text-sm text-[#2A2722]">
         Write mode active. Mutations are executed by the FastAPI backend only.
       </div>
     );
   }
   if (writeMode && !canWrite) {
     return (
-      <div className="mb-6 border-l-2 border-[#B36B00] bg-[#B36B00]/10 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-[#2A2722]">
+      <div className="mb-5 border-l-2 border-[#B36B00] bg-[#B36B00]/10 px-4 py-3 text-sm text-[#2A2722]">
         Browser write mode is selected, but the backend is locked by DASHBOARD_READ_ONLY=true.
       </div>
     );
@@ -61,18 +61,18 @@ export function OperationPanel({
   return (
     <div className="border border-[#11100D]/12 bg-[#EFE9D9]/55 p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="font-display text-base font-medium text-[#11100D]">{title}</h3>
+        <h3 className="font-display text-base font-semibold text-[#11100D]">{title}</h3>
         {state?.busy && <Loader2 className="h-4 w-4 animate-spin text-[#1535C7]" />}
       </div>
       {children}
       {state?.message && (
-        <p className="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[#07683C]">
+        <p className="mt-3 flex items-center gap-2 text-xs text-[#07683C]">
           <CheckCircle2 className="h-3.5 w-3.5" />
           {state.message}
         </p>
       )}
       {state?.error && (
-        <p className="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.12em] text-[#DD2A1C]">
+        <p className="mt-3 flex items-center gap-2 text-xs text-[#DD2A1C]">
           <AlertTriangle className="h-3.5 w-3.5" />
           {state.error}
         </p>
@@ -90,7 +90,7 @@ export function Field({
 }) {
   return (
     <label className="grid gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#6F6A5F]">{label}</span>
+      <span className="label-compact">{label}</span>
       {children}
     </label>
   );
@@ -115,7 +115,7 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={disabled || busy}
-      className="inline-flex items-center justify-center gap-2 border border-[#11100D] bg-[#11100D] px-3 py-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[#EFE9D9] transition hover:border-[#DD2A1C] hover:bg-[#DD2A1C] disabled:cursor-not-allowed disabled:border-[#11100D]/20 disabled:bg-[#11100D]/20"
+      className="inline-flex items-center justify-center gap-2 border border-[#11100D] bg-[#11100D] px-3 py-2 font-mono text-xs font-medium uppercase tracking-[0.08em] text-[#EFE9D9] transition hover:border-[#DD2A1C] hover:bg-[#DD2A1C] disabled:cursor-not-allowed disabled:border-[#11100D]/20 disabled:bg-[#11100D]/20"
     >
       <Icon className={`h-3.5 w-3.5 ${busy ? 'animate-spin' : ''}`} />
       {children}

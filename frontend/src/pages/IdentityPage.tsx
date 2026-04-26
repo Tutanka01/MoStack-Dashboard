@@ -21,8 +21,8 @@ export default function IdentityPage({ refreshKey }: { refreshKey: number }) {
       <PageTitle
         num="06"
         eyebrow="Keystone"
-        title="Identity & access — who is allowed to touch what."
-        description="Projects, users, roles and service endpoints — Keystone is the authentication entrypoint and the catalogue of every other OpenStack service."
+        title="Identity"
+        description="Keystone projects, users, roles and service endpoints."
         meta={[
           { label: 'Projects', value: String(projectRows.length) },
           { label: 'Users',    value: String(apiItems(users.data).length) },
@@ -35,7 +35,7 @@ export default function IdentityPage({ refreshKey }: { refreshKey: number }) {
 
       {/* AUTH FLOW + PROJECT MAP */}
       <div className="mb-6 grid gap-6 xl:grid-cols-[1fr_440px] fade-up delay-1">
-        <Panel num="06.A" title="Architecture view" eyebrow="Auth first" variant="klein">
+        <Panel num="06.A" title="Auth flow" eyebrow="Reference" variant="klein">
           <div className="grid gap-px bg-[#11100D]/12 md:grid-cols-4">
             {['Client', 'Keystone token', 'Service catalog', 'OpenStack API'].map((item, index) => (
               <div key={item} className="bg-[#F7F2E2] p-4 relative">
@@ -50,9 +50,6 @@ export default function IdentityPage({ refreshKey }: { refreshKey: number }) {
               </div>
             ))}
           </div>
-          <p className="mt-4 font-serif italic text-[#2A2722]">
-            Le client présente ses credentials à Keystone, reçoit un token Fernet, puis présente ce token aux autres services. Le catalogue dit où chaque service écoute.
-          </p>
         </Panel>
 
         <Panel num="06.B" title="Lab project map" eyebrow="Current vs planned">

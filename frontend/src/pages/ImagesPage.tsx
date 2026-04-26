@@ -8,8 +8,8 @@ import { Field, inputClass, OperationPanel, OperatorNotice, OperatorProps, Submi
 import { Panel } from '../components/Panel';
 import { AnyRecord, Mono, PageTitle, apiItems, formatBytes, formatDate, statusCell } from './pageUtils';
 
-const BTN = 'inline-flex items-center gap-1 border border-[#11100D]/20 bg-[#F7F2E2] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
-const BTN_DANGER = 'inline-flex items-center gap-1 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
+const BTN = 'inline-flex items-center gap-1.5 border border-[#11100D]/20 bg-[#F7F2E2] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
+const BTN_DANGER = 'inline-flex items-center gap-1.5 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
 
 const FAMILY_TONES: Record<string, string> = {
   CirrOS:              'is-flag',
@@ -73,8 +73,8 @@ export default function ImagesPage({ refreshKey, writeMode, canWrite, onMutated 
       <PageTitle
         num="05"
         eyebrow="Glance"
-        title="Image catalogue — the genome of every VM."
-        description="Create image metadata, import from URL via Glance web-download, manage visibility, and deactivate or delete images."
+        title="Images"
+        description="Glance image catalog, import queue, visibility and image lifecycle."
         meta={[
           { label: 'Images',   value: String(rows.length) },
           { label: 'Families', value: String(Object.keys(families).length) },
@@ -237,15 +237,6 @@ export default function ImagesPage({ refreshKey, writeMode, canWrite, onMutated 
         </Panel>
 
         {/* ── GLANCE ROLE ─────────────────────────────────────────── */}
-        <Panel num="05.B" title="Glance role" eyebrow="Learning note" variant="klein">
-          <p className="font-serif italic text-2xl leading-9 max-w-3xl text-[#2A2722]">
-            <span className="not-italic font-display font-medium text-[#11100D]">Glance</span> ne lance pas les VMs.
-            Il <span className="not-italic font-mono text-base text-[#1535C7]">stocke</span> les images utilisées ensuite par
-            <span className="not-italic font-display font-medium text-[#11100D]"> Nova</span> pour construire le disque initial d'une instance.
-            L'import <span className="not-italic font-mono text-base text-[#1535C7]">web-download</span> permet à Glance de télécharger
-            directement depuis une URL publique, sans transit par le client.
-          </p>
-        </Panel>
       </div>
     </>
   );

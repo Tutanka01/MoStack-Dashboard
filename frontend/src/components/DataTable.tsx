@@ -15,23 +15,23 @@ type Props<T> = {
   index?: boolean;
 };
 
-export function DataTable<T>({ rows, columns, empty = 'No records observed.', index = true }: Props<T>) {
+export function DataTable<T>({ rows, columns, empty = 'No records observed.', index = false }: Props<T>) {
   if (!rows || rows.length === 0) return <EmptyState title={empty} />;
 
   return (
-    <div className="overflow-x-auto -mx-5 -mb-5">
-      <table className="w-full min-w-[760px] border-collapse text-left">
+    <div className="overflow-x-auto -mx-4 -mb-4 md:-mx-5 md:-mb-5">
+      <table className="w-full min-w-[720px] border-collapse text-left">
         <thead>
           <tr className="border-y border-[#11100D]/15 bg-[#E5DEC9]/40">
             {index && (
-              <th className="px-3 py-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[#6F6A5F] w-[44px] text-right tabular">
-                Nº
+              <th className="px-3 py-2.5 font-mono text-xs font-medium uppercase tracking-[0.08em] text-[#6F6A5F] w-[44px] text-right tabular">
+                No.
               </th>
             )}
             {columns.map((column) => (
               <th
                 key={column.header}
-                className={`px-3 py-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-[#6F6A5F] ${
+                className={`px-3 py-2.5 font-mono text-xs font-medium uppercase tracking-[0.08em] text-[#6F6A5F] ${
                   column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : ''
                 } ${column.className || ''}`}
                 style={{ width: column.width }}
@@ -48,14 +48,14 @@ export function DataTable<T>({ rows, columns, empty = 'No records observed.', in
               className="border-b border-[#11100D]/8 last:border-0 transition-colors duration-150 hover:bg-[#EFE9D9]/60"
             >
               {index && (
-                <td className="px-3 py-3 align-top font-mono text-[11px] tabular text-[#6F6A5F] text-right">
+                <td className="px-3 py-3 align-top font-mono text-xs tabular text-[#6F6A5F] text-right">
                   {String(i + 1).padStart(2, '0')}
                 </td>
               )}
               {columns.map((column) => (
                 <td
                   key={column.header}
-                  className={`px-3 py-3 align-top text-sm tabular text-[#11100D] ${
+                  className={`px-3 py-3 align-top text-sm leading-5 tabular text-[#11100D] ${
                     column.align === 'right' ? 'text-right' : column.align === 'center' ? 'text-center' : ''
                   } ${column.className || ''}`}
                 >

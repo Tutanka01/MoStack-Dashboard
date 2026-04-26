@@ -10,9 +10,9 @@ import { Field, inputClass, OperationPanel, OperatorNotice, OperatorProps, Submi
 import { Panel } from '../components/Panel';
 import { AnyRecord, Mono, PageTitle, apiItems, formatAddresses, formatDate, statusCell } from './pageUtils';
 
-const BTN = 'inline-flex items-center gap-1 border border-[#11100D]/20 bg-[#F7F2E2] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
-const BTN_DANGER = 'inline-flex items-center gap-1 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
-const BTN_CONFIRM = 'inline-flex items-center gap-1 border border-[#07683C]/40 bg-[#07683C]/[0.07] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#07683C] transition hover:bg-[#07683C] hover:text-white disabled:opacity-35 cursor-pointer';
+const BTN = 'inline-flex items-center gap-1.5 border border-[#11100D]/20 bg-[#F7F2E2] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
+const BTN_DANGER = 'inline-flex items-center gap-1.5 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
+const BTN_CONFIRM = 'inline-flex items-center gap-1.5 border border-[#07683C]/40 bg-[#07683C]/[0.07] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#07683C] transition hover:bg-[#07683C] hover:text-white disabled:opacity-35 cursor-pointer';
 
 export default function ComputePage({ refreshKey, writeMode, canWrite, onMutated }: { refreshKey: number } & OperatorProps) {
   const servers    = useApi<AnyRecord>('/compute/servers', refreshKey);
@@ -120,8 +120,8 @@ export default function ComputePage({ refreshKey, writeMode, canWrite, onMutated
       <PageTitle
         num="02"
         eyebrow="Nova"
-        title="Compute fabric — where instances actually run."
-        description="Instances, hypervisors, keypairs and Nova control services. Full lifecycle management: boot, resize, snapshot, pause, shelve."
+        title="Compute"
+        description="Instances, hypervisors, keypairs and Nova control services."
         meta={[
           { label: 'Instances',   value: String(serverRows.length) },
           { label: 'Hypervisors', value: String(hyperRows.length) },
@@ -471,7 +471,7 @@ export default function ComputePage({ refreshKey, writeMode, canWrite, onMutated
         </div>
 
         {/* ── NOVA CONTROL FLOW ───────────────────────────────────────────── */}
-        <Panel num="02.D" title="Nova control flow" eyebrow="Pedagogical model" variant="klein">
+        <Panel num="02.D" title="Nova control flow" eyebrow="Reference" variant="klein">
           <div className="grid gap-px bg-[#11100D]/12 md:grid-cols-4">
             {[
               { name: 'nova-api',       detail: 'Receives REST calls and validates Keystone tokens before anything else.', Icon: ServerCog, code: 'A' },

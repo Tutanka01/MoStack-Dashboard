@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Activity,
+  ChevronDown,
   Cloud,
   Database,
   Fingerprint,
@@ -66,77 +67,46 @@ export function AppShell({
   const status = (globalStatus || 'UNKNOWN').toUpperCase();
   const isUp = status === 'UP';
   const location = useLocation();
+  const navigate = useNavigate();
   const current = navItems.find(
     (item) => item.to === location.pathname || (item.to !== '/' && location.pathname.startsWith(item.to))
   ) || navItems[0];
-
-  const tickerItems = [
-    `MOSTACK · OPENSTACK CONSOLE`,
-    `EDITION 01 · v1.0`,
-    `REGION · ${region}`,
-    `BACKEND · 127.0.0.1:8000`,
-    `CONTROLLER · 10.3.17.143`,
-    `COMPUTE01 · 10.3.17.144`,
-    `COMPUTE02/STORAGE · 10.3.17.145`,
-    `PROVIDER · 10.3.16.0/23`,
-    `OVS · provider:br-provider`,
-    `CINDER · cinder-volumes / lvm`,
-    `MODE · ${writeMode ? 'WRITE' : 'READ-ONLY'}`
-  ];
   const ModeIcon = writeMode ? Unlock : Lock;
 
   return (
     <div className="relative min-h-screen bg-[#EFE9D9] text-[#11100D]">
-      {/* TICKER BAR */}
       <div className="relative z-40 border-b border-[#11100D]/15 bg-[#11100D] text-[#EFE9D9]">
         <div className="flex items-stretch">
           <div className="flex items-center gap-2 px-4 py-1.5 border-r border-[#EFE9D9]/15 shrink-0">
             <span className={`dot-pulse ${isUp ? '' : 'is-down'}`} />
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em]">
-              {isUp ? 'LIVE' : status}
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em]">
+              {isUp ? 'Live' : status}
             </span>
           </div>
-          <div className="hidden md:flex items-center gap-2 px-4 py-1.5 border-r border-[#EFE9D9]/15 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em]">
+          <div className="hidden md:flex items-center gap-2 px-4 py-1.5 border-r border-[#EFE9D9]/15 shrink-0 font-mono text-[10px] uppercase tracking-[0.12em]">
             <span className="opacity-60">UTC</span>
             <span className="tabular">{utc}</span>
           </div>
-          <div className="hidden lg:flex items-center gap-2 px-4 py-1.5 border-r border-[#EFE9D9]/15 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em]">
-            <span className="opacity-60">DATE</span>
-            <span className="tabular">{dateStr}</span>
+          <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
+            <span className="truncate">MoStack OpenStack console</span>
+            <span className="hidden md:inline text-[#EFE9D9]/55">Region {region}</span>
+            <span className="hidden lg:inline text-[#EFE9D9]/55">{dateStr}</span>
           </div>
-          <div className="marquee flex-1 self-center">
-            <div className="marquee-track py-1.5 font-mono text-[10px] uppercase tracking-[0.18em]">
-              {[...tickerItems, ...tickerItems].map((item, idx) => (
-                <span key={idx} className="opacity-80">
-                  <span className="opacity-50 mr-3">◆</span>
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="hidden md:flex items-center gap-2 px-4 py-1.5 border-l border-[#EFE9D9]/15 shrink-0 font-mono text-[10px] uppercase tracking-[0.16em]">
+          <div className="hidden md:flex items-center gap-2 px-4 py-1.5 border-l border-[#EFE9D9]/15 shrink-0 font-mono text-[10px] uppercase tracking-[0.12em]">
             <ModeIcon className="h-3 w-3" />
-            {writeMode ? 'WRITE' : 'READ-ONLY'}
+            {writeMode ? 'Write' : 'Read-only'}
           </div>
         </div>
       </div>
 
-      {/* MAIN GRID */}
-      <div className="lg:pl-[300px] relative z-10">
-        {/* SIDEBAR */}
-        <aside className="fixed top-[33px] bottom-0 left-0 z-30 hidden w-[300px] flex-col border-r border-[#11100D]/15 bg-[#EFE9D9] lg:flex">
-          {/* Wordmark */}
+      <div className="lg:pl-[280px] relative z-10">
+        <aside className="fixed top-[33px] bottom-0 left-0 z-30 hidden w-[280px] flex-col border-r border-[#11100D]/15 bg-[#EFE9D9] lg:flex">
           <div className="px-6 pt-6 pb-5 border-b border-[#11100D]/12">
             <div className="flex items-center gap-2.5">
               <div className="relative h-7 w-7">
                 <div className="absolute inset-0 bg-[#11100D]" />
                 <div className="absolute inset-[5px] bg-[#DD2A1C]" />
-                <svg
-                  className="absolute inset-[7px]"
-                  viewBox="0 0 100 100"
-                  aria-hidden="true"
-                  focusable="false"
-                >
+                <svg className="absolute inset-[7px]" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
                   <path
                     d="M50 7 60 38 93 38 66 57 76 89 50 69 24 89 34 57 7 38 40 38Z"
                     fill="none"
@@ -146,20 +116,19 @@ export function AppShell({
                   />
                 </svg>
               </div>
-              <h1 className="font-display text-[26px] font-semibold leading-none tracking-[-0.02em]">
+              <h1 className="font-display text-[26px] font-semibold leading-none">
                 MoStack
               </h1>
             </div>
-            <p className="mt-2 font-serif text-[15px] italic text-[#2A2722] leading-tight">
-              An OpenStack lab observatory
+            <p className="mt-2 text-sm text-[#4A453B] leading-tight">
+              OpenStack lab console
             </p>
-            <div className="mt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-[#6F6A5F]">
+            <div className="mt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.14em] text-[#6F6A5F]">
               <span>Edition 01</span>
               <span className="tabular">v1.0</span>
             </div>
           </div>
 
-          {/* Section index */}
           <div className="px-6 pt-5 pb-2 flex items-end justify-between">
             <p className="eyebrow">Sections</p>
             <p className="font-mono text-[10px] tabular text-[#6F6A5F]">
@@ -182,15 +151,14 @@ export function AppShell({
             ))}
           </nav>
 
-          {/* Footer block */}
-          <div className="mt-auto border-t border-[#11100D]/12 px-6 py-4 grid gap-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[#6F6A5F]">
+          <div className="mt-auto border-t border-[#11100D]/12 px-6 py-4 grid gap-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#6F6A5F]">
             <div className="flex justify-between">
               <span>Backend</span>
               <span>FastAPI</span>
             </div>
             <div className="flex justify-between">
               <span>Frontend</span>
-              <span>React 19 / Vite</span>
+              <span>React / Vite</span>
             </div>
             <div className="flex justify-between">
               <span>Mode</span>
@@ -205,18 +173,16 @@ export function AppShell({
           </div>
         </aside>
 
-        {/* HEADER STRIP */}
         <header className="sticky top-[33px] z-20 border-b border-[#11100D]/15 bg-[#EFE9D9]/95 backdrop-blur-sm">
-          <div className="px-4 md:px-10 py-3.5 grid gap-3 lg:grid-cols-[1fr_auto] items-center">
+          <div className="px-4 md:px-10 py-3 grid gap-3 lg:grid-cols-[1fr_auto] items-center">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[10px] tabular text-[#6F6A5F] tracking-[0.18em]">
+              <span className="font-mono text-[10px] tabular text-[#6F6A5F] tracking-[0.12em]">
                 {current.num}
               </span>
               <span className="hidden sm:inline-block h-3 w-px bg-[#11100D]/25" />
               <span className="font-display text-base font-medium tracking-tight text-[#11100D]">
                 {current.label}
               </span>
-              <span className="hidden sm:inline-block h-3 w-px bg-[#11100D]/25 mx-1" />
               <StatusBadge value={globalStatus} />
               <span className="meta-pill">
                 <span>Region</span>
@@ -227,77 +193,73 @@ export function AppShell({
                 {writeMode ? 'Write' : 'Read-only'}
               </span>
             </div>
-            <div className="flex items-center gap-3 justify-end">
+            <div className="flex flex-wrap items-center gap-2 justify-end">
               <button
                 type="button"
                 onClick={() => onWriteModeChange(!writeMode)}
-                className={`inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] transition ${
+                className={`inline-flex items-center gap-2 border px-3 py-2 font-mono text-xs font-medium uppercase tracking-[0.08em] transition ${
                   writeMode
                     ? 'border-[#DD2A1C] bg-[#DD2A1C] text-[#EFE9D9]'
                     : 'border-[#11100D]/30 bg-[#F7F2E2] text-[#11100D] hover:border-[#11100D]'
                 }`}
                 title={canWrite ? 'Toggle operator write mode' : 'Backend writes are locked by DASHBOARD_READ_ONLY'}
               >
-                <ModeIcon className="h-3 w-3" />
+                <ModeIcon className="h-3.5 w-3.5" />
                 {writeMode ? 'Write' : 'Read'}
               </button>
-              <label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#2A2722] cursor-pointer">
+              <label className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.08em] text-[#2A2722] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={autoRefresh}
                   onChange={(event) => onAutoRefreshChange(event.target.checked)}
                   className="h-3.5 w-3.5"
                 />
-                Auto-refresh 30s
+                Auto 30s
               </label>
               <button
                 type="button"
                 onClick={onRefresh}
-                className="group inline-flex items-center gap-2 border border-[#11100D] bg-[#11100D] px-3 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-[#EFE9D9] transition hover:bg-[#DD2A1C] hover:border-[#DD2A1C]"
+                className="group inline-flex items-center gap-2 border border-[#11100D] bg-[#11100D] px-3 py-2 font-mono text-xs font-medium uppercase tracking-[0.08em] text-[#EFE9D9] transition hover:bg-[#DD2A1C] hover:border-[#DD2A1C]"
               >
-                <RefreshCw className="h-3 w-3 transition group-hover:-rotate-180 duration-500" />
-                Refresh now
+                <RefreshCw className="h-3.5 w-3.5 transition group-hover:-rotate-180 duration-500" />
+                Refresh
               </button>
             </div>
           </div>
         </header>
 
-        {/* MAIN AREA */}
-        <main className="relative px-4 md:px-10 py-10 md:py-14 swiss-grid min-h-[calc(100vh-90px)]">
+        <main className="relative px-4 pb-24 pt-8 md:px-10 md:py-10 swiss-grid min-h-[calc(100vh-90px)]">
           <div className="relative">{children}</div>
-          <div className="mt-16 hatch-divider" />
-          <footer className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-[10px] uppercase tracking-[0.16em] text-[#6F6A5F]">
+          <div className="mt-12 hatch-divider" />
+          <footer className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-[10px] uppercase tracking-[0.12em] text-[#6F6A5F]">
             <div>
-              <span className="text-[#11100D]">MoStack</span> · OpenStack lab console
+              <span className="text-[#11100D]">MoStack</span> / OpenStack lab console
             </div>
             <div className="md:text-center">
-              No credentials in browser · Token stays in backend
+              No credentials in browser / Token stays in backend
             </div>
             <div className="md:text-right tabular">
-              {dateStr} · {utc} UTC
+              {dateStr} / {utc} UTC
             </div>
           </footer>
         </main>
       </div>
 
-      {/* MOBILE BOTTOM NAV (compact) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t border-[#11100D]/15 bg-[#EFE9D9]/95 backdrop-blur-sm lg:hidden">
-        {navItems.slice(0, 4).map(({ to, short, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) =>
-              `flex flex-col items-center justify-center py-2 text-[10px] font-mono uppercase tracking-[0.12em] ${
-                isActive ? 'bg-[#11100D] text-[#EFE9D9]' : 'text-[#11100D]'
-              }`
-            }
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-[#11100D]/15 bg-[#EFE9D9]/95 px-3 py-2 backdrop-blur-sm lg:hidden">
+        <div className="relative">
+          <select
+            aria-label="Current section"
+            value={current.to}
+            onChange={(event) => navigate(event.target.value)}
+            className="w-full appearance-none border border-[#11100D]/25 bg-[#F7F2E2] px-3 py-2 pr-9 font-mono text-xs uppercase tracking-[0.08em] text-[#11100D]"
           >
-            <Icon className="h-4 w-4 mb-1" />
-            {short}
-          </NavLink>
-        ))}
-      </nav>
+            {navItems.map(({ to, label, num }) => (
+              <option key={to} value={to}>{num} / {label}</option>
+            ))}
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6F6A5F]" />
+        </div>
+      </div>
     </div>
   );
 }

@@ -8,9 +8,9 @@ import { Field, inputClass, OperationPanel, OperatorNotice, OperatorProps, Submi
 import { Panel } from '../components/Panel';
 import { AnyRecord, Mono, PageTitle, apiItems, statusCell } from './pageUtils';
 
-const BTN = 'inline-flex items-center gap-1 border border-[#11100D]/20 bg-[#F7F2E2] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
-const BTN_DANGER = 'inline-flex items-center gap-1 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
-const BTN_CONFIRM = 'inline-flex items-center gap-1 border border-[#07683C]/40 bg-[#07683C]/[0.07] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-[#07683C] transition hover:bg-[#07683C] hover:text-white disabled:opacity-35 cursor-pointer';
+const BTN = 'inline-flex items-center gap-1.5 border border-[#11100D]/20 bg-[#F7F2E2] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
+const BTN_DANGER = 'inline-flex items-center gap-1.5 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
+const BTN_CONFIRM = 'inline-flex items-center gap-1.5 border border-[#07683C]/40 bg-[#07683C]/[0.07] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#07683C] transition hover:bg-[#07683C] hover:text-white disabled:opacity-35 cursor-pointer';
 
 export default function NetworkPage({ refreshKey, writeMode, canWrite, onMutated }: { refreshKey: number } & OperatorProps) {
   const networks      = useApi<AnyRecord>('/network/networks', refreshKey);
@@ -129,8 +129,8 @@ export default function NetworkPage({ refreshKey, writeMode, canWrite, onMutated
       <PageTitle
         num="03"
         eyebrow="Neutron"
-        title="Network plane — wires, routers, security."
-        description="Full Neutron management: networks, subnets, routers with gateway, floating IPs, security groups with rules, and ports."
+        title="Network"
+        description="Neutron networks, subnets, routers, floating IPs, security groups and ports."
         meta={[
           { label: 'Networks',  value: String(networkRows.length) },
           { label: 'Routers',   value: String(routerRows.length) },

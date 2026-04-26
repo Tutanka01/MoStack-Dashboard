@@ -30,22 +30,22 @@ export function MetricCard({ label, value, icon: Icon, hint, num, accent }: Prop
   return (
     <div className={`group panel-chrome ${variant} relative p-4 transition-transform duration-200 hover:-translate-y-px`}>
       {num && (
-        <span className="absolute right-3 top-2 font-mono text-[10px] tabular text-[#6F6A5F] tracking-[0.12em]">
+        <span className="absolute right-3 top-2 font-mono text-[10px] tabular text-[#6F6A5F] tracking-[0.08em]">
           {num}
         </span>
       )}
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <span className="eyebrow eyebrow-ink">{label}</span>
         {Icon && <Icon className="h-3.5 w-3.5 text-[#2A2722] opacity-70" />}
       </div>
       <div className="flex items-end gap-2">
-        <div className="font-display tabular text-[56px] leading-[0.85] font-medium text-[#11100D]">
-          {value ?? '—'}
+        <div className="font-display tabular text-[44px] leading-none font-semibold text-[#11100D]">
+          {value ?? '-'}
         </div>
         <div className={`mb-2 h-2 w-2 ${mark}`} aria-hidden />
       </div>
       {hint && (
-        <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[#6F6A5F]">
+        <div className="mt-3 font-mono text-xs uppercase tracking-[0.08em] text-[#6F6A5F]">
           {hint}
         </div>
       )}
