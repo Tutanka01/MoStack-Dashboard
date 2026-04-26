@@ -1,77 +1,110 @@
-# OpenStack Lab Control
+# MoStack Dashboard
 
-Dashboard local pour comprendre et piloter un lab OpenStack multi-node sans exposer les credentials au navigateur.
+> **Un cockpit complet pour piloter votre lab OpenStack** — sans jamais exposer un seul credential au navigateur.
 
-## Objectif
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?style=flat-square&logo=react)](https://react.dev)
+[![Docker](https://img.shields.io/badge/Deploy-Docker%20Compose-2496ED?style=flat-square&logo=docker)](https://docs.docker.com/compose/)
+[![OpenStack](https://img.shields.io/badge/Target-OpenStack-ED1944?style=flat-square&logo=openstack)](https://www.openstack.org)
 
-OpenStack Lab Control fournit une interface claire, pédagogique et architecturale pour observer Keystone, Nova, Neutron, Glance, Cinder et Placement. Le frontend React parle uniquement au backend FastAPI local. Le backend s'authentifie auprès de Keystone, récupère un token, découvre le service catalog et interroge les APIs OpenStack.
+---
+
+## Pourquoi MoStack Dashboard ?
+
+Administrer un lab OpenStack multi-node depuis Horizon, c'est naviguer dans une interface pensée pour la production, pas pour apprendre. MoStack Dashboard renverse cette logique : il expose **ce qui se passe vraiment** à l'intérieur — chaque service, chaque hyperviseur, chaque flux réseau — avec une interface épurée, des explications contextuelles et une architecture proxy qui garde vos tokens Keystone strictement côté serveur.
+
+**Un seul `docker compose up --build`. C'est tout.**
+
+---
+
+## Ce que vous obtenez
+
+| Vue | Ce qu'elle révèle |
+|---|---|
+| **Control Plane** | État temps-réel de tous les services OpenStack, compteurs globaux, health global |
+| **Compute Fabric** | Instances, hyperviseurs, capacité VCPU/RAM, services Nova et leurs rôles |
+| **Network Plane** | Networks, subnets, ports, agents Neutron, mapping OVS provider bridge |
+| **Block Storage** | Volumes, types, pools Cinder, backend LVM+iSCSI, scheduler stats |
+| **Images** | Catalogue Glance annoté, classification CirrOS / Ubuntu / Debian |
+| **Identity & Access** | Projets, utilisateurs, rôles, endpoints — architecture Keystone visualisée |
+| **Cloud Topology** | Vue graphique controller → compute → VMs → Cinder backend |
+| **Learning Mode** | Flux pédagogiques animés : create server, attach volume, provider network |
+
+---
 
 ## Architecture
 
-- `frontend/` : React + TypeScript + Vite + Tailwind CSS + Recharts + Lucide React.
-- `backend/` : FastAPI, proxy REST vers OpenStack avec verrou read-only serveur.
-- `docker-compose.yml` : lance le backend sur `8000` et le frontend sur `5173`.
-- `.env` : toute la configuration sensible et lab-specific.
+```
+Browser ──► React + Vite (port 5173)
+                │
+                │  API calls (pas de credentials, pas de token)
+                ▼
+         FastAPI Proxy (port 8000)
+                │
+                │  Token Keystone — côté backend uniquement
+                ▼
+         OpenStack APIs (Keystone, Nova, Neutron, Glance, Cinder, Placement)
+```
 
-Le token Keystone reste côté backend. Il n'est jamais renvoyé au frontend.
+- **Frontend** : React + TypeScript + Vite + Tailwind CSS + Recharts + Lucide React
+- **Backend** : FastAPI, proxy REST vers OpenStack — token Keystone jamais renvoyé au client
+- **Déploiement** : `docker-compose.yml` clé-en-main, configurable par variables d'environnement
+- **Sécurité** : `DASHBOARD_READ_ONLY=true` par défaut — le backend refuse toute mutation tant que le flag est actif
 
-## Configuration
+---
 
-Créez votre `.env` depuis l'exemple :
+## Démarrage rapide
+
+**1. Cloner et configurer**
 
 ```bash
+git clone <repo>
+cd MoStack-Dashboard
 cp .env.example .env
 ```
 
-Puis remplacez au minimum :
+Éditez `.env` avec les informations de votre lab :
 
 ```env
+OPENSTACK_AUTH_URL=http://<controller-ip>:5000/v3
 OPENSTACK_USERNAME=admin
 OPENSTACK_PASSWORD=your-password
 OPENSTACK_PROJECT_NAME=admin
-DASHBOARD_READ_ONLY=true
 ```
 
-Pour autoriser les actions depuis le dashboard, passez explicitement le backend en mode ecriture :
-
-```env
-DASHBOARD_READ_ONLY=false
-```
-
-Les valeurs par défaut ciblent le lab décrit :
-
-- Controller : `OS-controller01 / 10.3.17.143`
-- Compute 1 : `OS-compute01 / 10.3.17.144`
-- Compute 2 / Storage : `OS-comput02 / 10.3.17.145`
-- Provider subnet : `10.3.16.0/23`
-- OVS mapping : `provider:br-provider`
-- Cinder backend : `os-comput02@lvm#lvm`, VG `cinder-volumes`
-
-## Lancement
+**2. Lancer**
 
 ```bash
 docker compose up --build
 ```
 
-Frontend :
+**3. Ouvrir**
 
-```text
-http://localhost:5173
+```
+http://localhost:5173   →  Dashboard
+http://localhost:8000/docs  →  API FastAPI (OpenAPI)
 ```
 
-Backend :
+> Si un port est déjà pris :
+> ```bash
+> BACKEND_PORT=8001 FRONTEND_PORT=5174 docker compose up --build
+> ```
 
-```text
-http://localhost:8000
+---
+
+## Mode écriture
+
+Par défaut, le backend est en **read-only** : aucune action destructive n'est possible, même si le frontend l'envoie. Pour activer les opérations de gestion :
+
+```env
+DASHBOARD_READ_ONLY=false
 ```
 
-Si un port est deja occupe localement :
+Les actions destructives demandent une confirmation explicite dans l'interface avant d'être transmises au backend.
 
-```bash
-BACKEND_PORT=8001 FRONTEND_PORT=5174 docker compose up --build
-```
+---
 
-## Tester le backend
+## Vérification rapide
 
 ```bash
 curl http://localhost:8000/api/health
@@ -79,57 +112,46 @@ curl http://localhost:8000/api/overview
 curl http://localhost:8000/api/compute/servers
 ```
 
-La documentation OpenAPI FastAPI est disponible ici :
+---
 
-```text
-http://localhost:8000/docs
-```
+## APIs OpenStack couvertes
 
-## APIs OpenStack utilisees
+| Service | Endpoints |
+|---|---|
+| **Keystone v3** | `POST /auth/tokens` · `GET /projects` · `GET /users` · `GET /roles` · `GET /endpoints` |
+| **Nova** | `GET /servers/detail` · `GET /os-hypervisors/detail` · `GET /os-services` |
+| **Neutron** | `GET /networks` · `GET /subnets` · `GET /ports` · `GET /agents` |
+| **Glance v2** | `GET /images` |
+| **Cinder v3** | `GET /volumes/detail` · `GET /types` · `GET /os-services` · `GET /scheduler-stats/get_pools` |
+| **Placement** | `GET /resource_providers` |
 
-- Keystone v3 : `POST /auth/tokens`, `GET /projects`, `GET /users`, `GET /roles`, `GET /endpoints`
-- Nova : `GET /servers/detail`, `GET /os-hypervisors/detail`, `GET /os-services`
-- Neutron : `GET /v2.0/networks`, `GET /v2.0/subnets`, `GET /v2.0/ports`, `GET /v2.0/agents`
-- Glance v2 : `GET /v2/images`
-- Cinder v3 : `GET /volumes/detail`, `GET /types`, `GET /os-services`, `GET /scheduler-stats/get_pools?detail=True`
-- Placement : `GET /resource_providers`
+Les endpoints sont découverts automatiquement via le **service catalog Keystone** selon `OPENSTACK_REGION_NAME` et `OPENSTACK_INTERFACE`.
 
-Les endpoints sont decouverts via le service catalog Keystone selon `OPENSTACK_REGION_NAME` et `OPENSTACK_INTERFACE`.
+---
 
-## Fonctionnalites v1
+## Sécurité
 
-- Overview / Control Plane : etat des services, compteurs, dernier etat observe.
-- Compute Fabric : instances, hyperviseurs, services Nova, explication des roles Nova.
-- Network Plane : networks, subnets, ports, agents Neutron, provider network et mapping OVS.
-- Persistent Block Storage : volumes, volume types, services, pools, backend LVM+iSCSI.
-- Images : catalogue Glance et classification CirrOS/Ubuntu/Debian.
-- Identity & Access : projets, utilisateurs, roles, endpoints, vue architecture Keystone.
-- Cloud Topology : controller, compute nodes, provider network, VMs, Cinder backend.
-- Learning Mode : flux pedagogiques create server, attach volume, provider network.
+- Zéro credential hardcodé — tout passe par `.env`, ignoré par Git
+- Le token Keystone ne quitte jamais le backend
+- `DASHBOARD_READ_ONLY=true` par défaut — verrou serveur, pas seulement UI
+- Les erreurs OpenStack sont absorbées proprement sans crasher l'interface
 
-## Securite
+---
 
-- Aucun mot de passe hardcode.
-- `.env` est ignore par Git.
-- Le frontend ne recoit jamais les credentials ni le token Keystone.
-- `DASHBOARD_READ_ONLY=true` par defaut, et le backend refuse toute mutation tant qu'il reste actif.
-- Les actions destructives passent uniquement par l'API backend et demandent une confirmation cote interface.
-- Les erreurs OpenStack sont affichees sans rendre l'interface brutale.
+## Limitations connues (v1)
 
-## Limitations v1
+- Upload binaire d'images Glance non implémenté (metadata uniquement)
+- Pas de gestion avancée des ports Neutron
+- Pas de RBAC propre au dashboard
+- Refresh manuel ou auto-refresh 30 s — pas de WebSocket temps réel
 
-- Upload binaire d'images Glance non implemente, seule la creation de metadata image est exposee.
-- Pas de gestion avancee des ports Neutron.
-- Pas de gestion RBAC propre au dashboard.
-- Pas de monitoring temps reel, uniquement refresh manuel ou auto-refresh 30 secondes.
-- La qualite des donnees depend des droits du compte OpenStack configure.
+---
 
 ## Roadmap
 
-- Actions controlees : create server, create volume, attach volume.
-- Self-service networking.
-- Floating IP.
-- Quotas/projects.
-- Monitoring Prometheus.
-- Vue backend Ceph.
-- RBAC dashboard users.
+- [ ] Actions : create server, create volume, attach/detach volume
+- [ ] Self-service networking & floating IPs
+- [ ] Quotas et gestion multi-projets
+- [ ] Monitoring Prometheus intégré
+- [ ] Vue backend Ceph
+- [ ] RBAC utilisateurs dashboard
