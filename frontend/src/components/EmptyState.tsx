@@ -2,10 +2,11 @@ import { CircleDashed } from 'lucide-react';
 
 export function EmptyState({ title }: { title: string }) {
   return (
-    <div className="flex min-h-32 items-center justify-center border border-dashed border-zinc-300 bg-zinc-50 p-6 text-center text-sm text-zinc-500">
-      <div>
-        <CircleDashed className="mx-auto mb-3 h-5 w-5 text-zinc-400" />
-        {title}
+    <div className="grid place-items-center min-h-32 border border-dashed border-[#11100D]/20 bg-[#EFE9D9]/30 p-8 text-center">
+      <div className="grid gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#6F6A5F]">
+        <CircleDashed className="mx-auto mb-1 h-4 w-4 opacity-60" />
+        <span>{title}</span>
+        <span className="text-[9px] opacity-70">— end of dataset —</span>
       </div>
     </div>
   );

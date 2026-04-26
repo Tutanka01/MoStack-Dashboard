@@ -19,30 +19,58 @@ export default function LearningPage({ refreshKey }: { refreshKey: number }) {
 
   return (
     <>
-      <PageTitle eyebrow="Pedagogy" title="Learning Mode" description="OpenStack explained through this actual lab: real service names, real network mapping and the operational sequence behind common actions." />
-      {[createServer, attachVolume, providerNetwork].map((state, index) => <ErrorNotice key={index} message={state.error} />)}
+      <PageTitle
+        num="08"
+        eyebrow="Pedagogy"
+        title="Learning mode — OpenStack, told through this lab."
+        description="OpenStack expliqué via ce vrai cluster — vrais noms de services, vraie cartographie réseau et la vraie séquence opérationnelle derrière les actions courantes."
+      />
+      {[createServer, attachVolume, providerNetwork].map((state, index) => (
+        <ErrorNotice key={index} message={state.error} />
+      ))}
 
-      <div className="grid gap-6">
-        <Panel title={createServer.data?.title || 'Create server flow'} eyebrow="Nova + Placement + Neutron + Glance">
+      <div className="grid gap-6 fade-up delay-1">
+        <Panel
+          num="08.A"
+          title={createServer.data?.title || 'Create server flow'}
+          eyebrow="Nova + Placement + Neutron + Glance"
+          variant="flag"
+        >
           <FlowDiagram steps={createServer.data?.steps || []} />
         </Panel>
-        <Panel title={attachVolume.data?.title || 'Attach volume flow'} eyebrow="Cinder + iSCSI + Nova">
+        <Panel
+          num="08.B"
+          title={attachVolume.data?.title || 'Attach volume flow'}
+          eyebrow="Cinder + iSCSI + Nova"
+          variant="klein"
+        >
           <FlowDiagram steps={attachVolume.data?.steps || []} />
         </Panel>
-        <Panel title={providerNetwork.data?.title || 'Provider network flow'} eyebrow="Neutron + OVS">
+        <Panel
+          num="08.C"
+          title={providerNetwork.data?.title || 'Provider network flow'}
+          eyebrow="Neutron + OVS"
+        >
           <FlowDiagram steps={providerNetwork.data?.steps || []} />
         </Panel>
-        <Panel title="Quel service appelle quel service ?" eyebrow="Compact reference">
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+
+        <Panel num="08.D" title="Quel service appelle quel service ?" eyebrow="Compact reference">
+          <div className="grid gap-px bg-[#11100D]/12 md:grid-cols-2 xl:grid-cols-4">
             {[
-              ['Keystone', 'Authentifie les clients et fournit le catalogue des endpoints.'],
-              ['Nova', 'Orchestre les VMs et delegue reseau, image et stockage aux bons services.'],
-              ['Neutron', 'Cree les ports, subnets et branche OVS vers le provider network.'],
-              ['Cinder', 'Expose des volumes persistants depuis LVM+iSCSI sur os-comput02.']
-            ].map(([name, detail]) => (
-              <div key={name} className="border border-zinc-200 bg-white p-4">
-                <h3 className="mb-3 text-lg font-semibold">{name}</h3>
-                <p className="text-sm leading-6 text-zinc-600">{detail}</p>
+              ['Keystone', 'Authentifie les clients et fournit le catalogue des endpoints.', '#11100D'],
+              ['Nova',     'Orchestre les VMs et délègue réseau, image et stockage aux bons services.', '#DD2A1C'],
+              ['Neutron',  'Crée les ports, subnets et branche OVS vers le provider network.', '#1535C7'],
+              ['Cinder',   'Expose des volumes persistants depuis LVM+iSCSI sur os-comput02.', '#07683C']
+            ].map(([name, detail, color], idx) => (
+              <div key={name} className="bg-[#F7F2E2] p-5 relative">
+                <span className="absolute right-3 top-3 font-mono text-[9px] tabular text-[#6F6A5F]">
+                  REF.{String(idx + 1).padStart(2, '0')}
+                </span>
+                <h3 className="font-display text-2xl font-medium tracking-tight" style={{ color: color as string }}>
+                  {name}
+                </h3>
+                <div className="mt-2 mb-3 h-0.5 w-8" style={{ background: color as string }} />
+                <p className="text-sm leading-6 text-[#2A2722]">{detail}</p>
               </div>
             ))}
           </div>
