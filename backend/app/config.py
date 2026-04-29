@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     openstack_nova_url: str = Field(default="http://10.3.17.143:8774/v2.1/{project_id}", alias="OPENSTACK_NOVA_URL")
     openstack_neutron_url: str = Field(default="http://10.3.17.143:9696", alias="OPENSTACK_NEUTRON_URL")
     openstack_cinder_url: str = Field(default="http://10.3.17.143:8776/v3/{project_id}", alias="OPENSTACK_CINDER_URL")
+    openstack_console_public_host: str | None = Field(default=None, alias="OPENSTACK_CONSOLE_PUBLIC_HOST")
+    openstack_console_host_aliases: str = Field(default="controller,os-controller01,OS-controller01", alias="OPENSTACK_CONSOLE_HOST_ALIASES")
 
     dashboard_read_only: bool = Field(default=True, alias="DASHBOARD_READ_ONLY")
     backend_cors_origins: str = Field(default="http://localhost:5173", alias="BACKEND_CORS_ORIGINS")
@@ -42,6 +44,16 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.backend_cors_origins.split(",") if origin.strip()]
+
+    @property
+    def console_host_aliases(self) -> set[str]:
+        values = {alias.strip().lower() for alias in self.openstack_console_host_aliases.split(",") if alias.strip()}
+        values.add(self.lab_controller_name.lower())
+        return values
+
+    @property
+    def console_public_host(self) -> str:
+        return self.openstack_console_public_host or self.lab_controller_ip
 
 
 @lru_cache

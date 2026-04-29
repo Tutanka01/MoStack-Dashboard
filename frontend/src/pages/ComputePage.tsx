@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Cpu, GitBranch, Key, Power, RotateCw, ServerCog, Square, Terminal } from 'lucide-react';
-import { apiGet } from '../api/client';
+import { Cpu, ExternalLink, GitBranch, Key, Maximize2, MonitorPlay, Power, RefreshCw, RotateCw, ServerCog, Square, Terminal } from 'lucide-react';
+import { apiGet, apiRequest } from '../api/client';
 import { useApi } from '../api/useApi';
 import { CapacityBar } from '../components/CapacityBar';
 import { DataTable } from '../components/DataTable';
@@ -13,6 +13,15 @@ import { AnyRecord, Mono, PageTitle, apiItems, formatAddresses, formatDate, stat
 const BTN = 'inline-flex items-center gap-1.5 border border-[#11100D]/20 bg-[#F7F2E2] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] transition hover:border-[#DD2A1C] disabled:opacity-35 cursor-pointer';
 const BTN_DANGER = 'inline-flex items-center gap-1.5 border border-[#DD2A1C]/30 bg-[#DD2A1C]/[0.06] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#DD2A1C] transition hover:bg-[#DD2A1C] hover:text-[#EFE9D9] disabled:opacity-35 cursor-pointer';
 const BTN_CONFIRM = 'inline-flex items-center gap-1.5 border border-[#07683C]/40 bg-[#07683C]/[0.07] px-2.5 py-1.5 font-mono text-xs uppercase tracking-[0.06em] text-[#07683C] transition hover:bg-[#07683C] hover:text-white disabled:opacity-35 cursor-pointer';
+const CONSOLE_BTN = 'inline-flex h-9 items-center justify-center gap-2 border border-[#EFE9D9]/20 bg-[#EFE9D9]/8 px-3 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#EFE9D9] transition hover:border-[#EFE9D9]/55 hover:bg-[#EFE9D9]/14 disabled:cursor-not-allowed disabled:opacity-40';
+
+type ConsoleSession = {
+  url?: string;
+  type?: string;
+  fetchedAt?: string;
+  loading?: boolean;
+  error?: string;
+};
 
 export default function ComputePage({ refreshKey, writeMode, canWrite, onMutated }: { refreshKey: number } & OperatorProps) {
   const servers    = useApi<AnyRecord>('/compute/servers', refreshKey);
@@ -39,6 +48,9 @@ export default function ComputePage({ refreshKey, writeMode, canWrite, onMutated
   const [attachTarget,   setAttachTarget]   = useState<string | null>(null);
   const [attachVolumeId, setAttachVolumeId] = useState('');
   const [consoleLogs,    setConsoleLogs]    = useState<Record<string, string>>({});
+  const [consoleSessions, setConsoleSessions] = useState<Record<string, ConsoleSession>>({});
+  const [activeConsoleId, setActiveConsoleId] = useState('');
+  const [consoleLogLength, setConsoleLogLength] = useState(200);
 
   if (servers.loading && hypervisors.loading && services.loading) return <LoadingBlock />;
 
@@ -50,6 +62,9 @@ export default function ComputePage({ refreshKey, writeMode, canWrite, onMutated
   const networkRows = apiItems<AnyRecord>(networks.data);
   const volumeRows  = apiItems<AnyRecord>(volumes.data);
   const limitsData  = ((limits.data as AnyRecord)?.items ?? {}) as AnyRecord;
+  const activeConsoleServer = serverRows.find(server => String(server.id) === activeConsoleId) || serverRows[0];
+  const activeConsoleSession = activeConsoleServer ? consoleSessions[String(activeConsoleServer.id)] : undefined;
+  const activeConsoleLog = activeConsoleServer ? consoleLogs[String(activeConsoleServer.id)] : undefined;
 
   function createServer(form: HTMLFormElement) {
     const d = new FormData(form);
@@ -84,14 +99,44 @@ export default function ComputePage({ refreshKey, writeMode, canWrite, onMutated
     form.reset();
   }
 
-  async function fetchConsoleLog(serverId: string) {
-    setConsoleLogs(prev => ({ ...prev, [serverId]: '⟳ Fetching…' }));
+  async function fetchConsoleLog(serverId: string, length = consoleLogLength) {
+    setConsoleLogs(prev => ({ ...prev, [serverId]: 'Fetching console output...' }));
     try {
-      const data = await apiGet<AnyRecord>(`/compute/servers/${serverId}/console-output?length=100`);
+      const data = await apiGet<AnyRecord>(`/compute/servers/${serverId}/console-output?length=${length}`);
       const output = (data as AnyRecord)?.items?.output as string || 'No output available.';
       setConsoleLogs(prev => ({ ...prev, [serverId]: output }));
     } catch (err) {
       setConsoleLogs(prev => ({ ...prev, [serverId]: err instanceof Error ? err.message : 'Failed.' }));
+    }
+  }
+
+  async function fetchConsoleUrl(serverId: string) {
+    setActiveConsoleId(serverId);
+    setConsoleSessions(prev => ({ ...prev, [serverId]: { ...prev[serverId], loading: true, error: undefined } }));
+    try {
+      const data = await apiRequest<AnyRecord>(`/compute/servers/${serverId}/console-url`, { method: 'POST' });
+      const consoleData = ((data as AnyRecord)?.items?.console || (data as AnyRecord)?.items || {}) as AnyRecord;
+      const url = String(consoleData.url || '');
+      if (!url) throw new Error('Nova did not return a console URL for this instance.');
+      setConsoleSessions(prev => ({
+        ...prev,
+        [serverId]: {
+          url,
+          type: String(consoleData.type || 'novnc'),
+          fetchedAt: new Date().toLocaleTimeString(),
+          loading: false,
+          error: undefined,
+        }
+      }));
+    } catch (err) {
+      setConsoleSessions(prev => ({
+        ...prev,
+        [serverId]: {
+          ...prev[serverId],
+          loading: false,
+          error: err instanceof Error ? err.message : 'Console unavailable.',
+        }
+      }));
     }
   }
 
@@ -380,6 +425,173 @@ export default function ComputePage({ refreshKey, writeMode, canWrite, onMutated
             </div>
           </Panel>
         )}
+
+        <Panel
+          num="02.CON"
+          title="VM console"
+          eyebrow="noVNC access and serial output"
+          variant="klein"
+          dense
+          action={<MonitorPlay className="h-5 w-5 text-[#1535C7]" />}
+        >
+          <div className="grid min-h-[560px] overflow-hidden bg-[#11100D] text-[#EFE9D9] xl:grid-cols-[320px_minmax(0,1fr)]">
+            <aside className="border-b border-[#EFE9D9]/12 bg-[#171611] xl:border-b-0 xl:border-r">
+              <div className="border-b border-[#EFE9D9]/12 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#EFE9D9]/55">Console deck</p>
+                    <h3 className="mt-1 font-display text-2xl font-semibold leading-none">Instances</h3>
+                  </div>
+                  <span className="border border-[#EFE9D9]/20 px-2 py-1 font-mono text-xs tabular">
+                    {String(serverRows.length).padStart(2, '0')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="max-h-[310px] overflow-y-auto xl:max-h-[438px]">
+                {serverRows.length === 0 && (
+                  <div className="p-5 text-sm leading-6 text-[#EFE9D9]/65">
+                    No instances are available for console access.
+                  </div>
+                )}
+                {serverRows.map((server) => {
+                  const id = String(server.id);
+                  const selected = String(activeConsoleServer?.id) === id;
+                  const session = consoleSessions[id];
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setActiveConsoleId(id)}
+                      className={`grid w-full gap-2 border-b border-[#EFE9D9]/10 p-4 text-left transition ${
+                        selected ? 'bg-[#EFE9D9] text-[#11100D]' : 'hover:bg-[#EFE9D9]/8'
+                      }`}
+                    >
+                      <div className="flex min-w-0 items-center justify-between gap-3">
+                        <span className="truncate font-display text-base font-semibold">{server.name || id}</span>
+                        <span className={`h-2 w-2 shrink-0 rounded-full ${String(server.status).toUpperCase() === 'ACTIVE' ? 'bg-[#33D17A]' : 'bg-[#DD2A1C]'}`} />
+                      </div>
+                      <div className={`flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] ${selected ? 'text-[#11100D]/70' : 'text-[#EFE9D9]/55'}`}>
+                        <span>{server.status || 'UNKNOWN'}</span>
+                        <span>{server.flavor || 'no-flavor'}</span>
+                        {session?.url && <span>session ready</span>}
+                      </div>
+                      <div className={`truncate font-mono text-[10px] ${selected ? 'text-[#11100D]/55' : 'text-[#EFE9D9]/40'}`}>
+                        {id}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </aside>
+
+            <div className="grid min-w-0 grid-rows-[auto_minmax(320px,1fr)_auto]">
+              <div className="grid gap-3 border-b border-[#EFE9D9]/12 bg-[#0D0C0A] p-3 2xl:grid-cols-[minmax(0,1fr)_auto] 2xl:items-center">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="dot-pulse" />
+                    <h3 className="truncate font-display text-xl font-semibold">
+                      {activeConsoleServer?.name || 'Select an instance'}
+                    </h3>
+                    {activeConsoleServer && (
+                      <span className="border border-[#EFE9D9]/20 px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[#EFE9D9]/70">
+                        {activeConsoleServer.status || 'UNKNOWN'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.12em] text-[#EFE9D9]/45">
+                    {activeConsoleServer ? `${activeConsoleServer.host || 'no-host'} / ${formatAddresses(activeConsoleServer.addresses)}` : 'Nova remote console'}
+                  </p>
+                </div>
+                <div className="flex min-w-0 flex-wrap gap-2 2xl:justify-end">
+                  <button
+                    type="button"
+                    disabled={!activeConsoleServer || activeConsoleSession?.loading}
+                    className={CONSOLE_BTN}
+                    onClick={() => activeConsoleServer && fetchConsoleUrl(String(activeConsoleServer.id))}
+                    title="Request a fresh noVNC console URL from Nova"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${activeConsoleSession?.loading ? 'animate-spin' : ''}`} />
+                    {activeConsoleSession?.url ? 'Refresh URL' : 'Connect'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!activeConsoleSession?.url}
+                    className={CONSOLE_BTN}
+                    onClick={() => activeConsoleSession?.url && window.open(activeConsoleSession.url, '_blank', 'noopener,noreferrer')}
+                    title="Open the VM console in a dedicated browser tab"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Open
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden bg-black">
+                {activeConsoleSession?.url ? (
+                  <iframe
+                    title={`Console for ${activeConsoleServer?.name || activeConsoleServer?.id}`}
+                    src={activeConsoleSession.url}
+                    className="h-full min-h-[360px] w-full border-0 bg-black"
+                    allow="clipboard-read; clipboard-write; fullscreen"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="grid h-full min-h-[360px] place-items-center p-8 text-center">
+                    <div className="max-w-lg">
+                      <div className="mx-auto mb-5 grid h-16 w-16 place-items-center border border-[#EFE9D9]/25 bg-[#EFE9D9]/6">
+                        <Maximize2 className="h-7 w-7 text-[#EFE9D9]/80" />
+                      </div>
+                      <h3 className="font-display text-3xl font-semibold">Remote console ready bay</h3>
+                      <p className="mt-3 text-sm leading-6 text-[#EFE9D9]/60">
+                        Pick a VM, then connect to request a short-lived noVNC URL from Nova. The session is embedded here and can also be opened full size.
+                      </p>
+                      {activeConsoleSession?.error && (
+                        <p className="mt-4 border border-[#DD2A1C]/40 bg-[#DD2A1C]/10 p-3 font-mono text-xs leading-5 text-[#FFB4A8]">
+                          {activeConsoleSession.error}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid border-t border-[#EFE9D9]/12 bg-[#171611] lg:grid-cols-[1fr_220px]">
+                <pre className="max-h-56 min-h-40 overflow-auto p-4 font-mono text-[11px] leading-5 text-[#D8F3DC] whitespace-pre-wrap">
+                  {activeConsoleLog || 'Serial output is idle. Fetch the latest boot log when you need diagnostics.'}
+                </pre>
+                <div className="grid gap-3 border-t border-[#EFE9D9]/12 p-4 lg:border-l lg:border-t-0">
+                  <label className="grid gap-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#EFE9D9]/55">
+                    Log lines
+                    <input
+                      type="number"
+                      min={25}
+                      max={2000}
+                      value={consoleLogLength}
+                      onChange={(event) => setConsoleLogLength(Number(event.target.value) || 200)}
+                      className="border border-[#EFE9D9]/20 bg-[#0D0C0A] px-2 py-2 font-mono text-xs text-[#EFE9D9]"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    disabled={!activeConsoleServer}
+                    className={CONSOLE_BTN}
+                    onClick={() => activeConsoleServer && fetchConsoleLog(String(activeConsoleServer.id))}
+                    title="Fetch serial console output from Nova"
+                  >
+                    <Terminal className="h-3.5 w-3.5" />
+                    Fetch log
+                  </button>
+                  {activeConsoleSession?.fetchedAt && (
+                    <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#EFE9D9]/45">
+                      URL issued at {activeConsoleSession.fetchedAt}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Panel>
 
         {/* ── INSTANCES TABLE ──────────────────────────────────────────── */}
         <Panel num="02.A" title="Instances" eyebrow="Nova servers — live" variant="flag">

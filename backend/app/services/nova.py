@@ -1,4 +1,5 @@
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 
 from app.openstack_client import OpenStackClient
 from app.utils.responses import first_list
@@ -72,7 +73,23 @@ async def get_console_output(client: OpenStackClient, server_id: str, length: in
 
 async def get_vnc_console(client: OpenStackClient, server_id: str, console_type: str = "novnc") -> dict[str, Any]:
     payload = {"os-getVNCConsole": {"type": console_type}}
-    return await client.request("compute", f"/servers/{server_id}/action", method="POST", json=payload, expected_status={200})
+    data = await client.request("compute", f"/servers/{server_id}/action", method="POST", json=payload, expected_status={200})
+    console = data.get("console")
+    if isinstance(console, dict) and isinstance(console.get("url"), str):
+        console["url"] = normalize_console_url(client, console["url"])
+    return data
+
+
+def normalize_console_url(client: OpenStackClient, url: str) -> str:
+    parts = urlsplit(url)
+    hostname = (parts.hostname or "").lower()
+    if not hostname or hostname not in client.settings.console_host_aliases:
+        return url
+
+    replacement_host = client.settings.console_public_host
+    if parts.port:
+        replacement_host = f"{replacement_host}:{parts.port}"
+    return urlunsplit((parts.scheme, replacement_host, parts.path, parts.query, parts.fragment))
 
 
 async def create_server_image(client: OpenStackClient, server_id: str, name: str) -> dict[str, Any]:
